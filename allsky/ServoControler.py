@@ -18,7 +18,7 @@ GPIO.setwarnings(False)
 GPIO.setup(SERVO_PIN,GPIO.OUT)
 
 class ServoControl:
-  def __init__(self, pin=SERVO_PIN, verbose=False):
+  def __init__(self, pin=SERVO_PIN, verbose=True):
     ''' Initialize servos and angles '''
     self.servo = GPIO.PWM(pin,50) 
     self.servo.start(0)
@@ -27,15 +27,20 @@ class ServoControl:
     self.alt0 = 0.
     self.logname = SHELL_LOG
     self.alt_last  = self.ReadLog()
-    print('Initial position: ', self.alt_last)
-    if self.alt_last == self.open_angle:
-      print('  (Open)  ')
-    elif self.alt_last == self.close_angle:
-      print('  (Close) ')
     self.verbose = verbose
+    if self.verbose: print('Initial position: ', self.alt_last)
+    if self.alt_last == self.open_angle:
+      if self.verbose: print('  (Open)  ')
+    elif self.alt_last == self.close_angle:
+      if self.verbose: print('  (Close) ')
     self.step = 20 # from 0 to 100
     self.slow = True
-    #self.GoToStandbyPosition()
+
+  def IsOpen(self):
+    return self.ReadLog() == self.open_angle
+
+  def IsClose(self):
+    return self.ReadLog() == self.close_angle
 
   def SetStep(self, step=10):
     self.step = step
@@ -105,19 +110,6 @@ class ServoControl:
     print("Finishing servo control")
 
   ########## Interaction
-  def GoToStandbyPosition(self):
-    ''' Goes to STANDBY by looking to the zenit '''
-    self.OpenDome()
-    time.sleep(1)
-
-  def SayYes(self):
-    ''' Says yes '''
-    for i in range(3):
-      self.GoToAlt(65)
-      time.sleep(0.01)
-      self.GoToAlt(40)
-      time.sleep(0.1)
-
   def CloseDome(self):
     self.GoToAlt(self.close_angle)
     time.sleep(0.1)

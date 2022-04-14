@@ -8,7 +8,7 @@ import zwoasi as asi
 from astropy.io import fits
 from allsky.obscoor import obscoor
 
-from allsky.config import SDK_LIB_PATH 
+from allsky.config import SDK_LIB_PATH, OUTPUT_IMAGES_DIR
 
 class zwo:
   def __init__(self, verbose=1):
@@ -38,10 +38,12 @@ class zwo:
     self.darkDir = None
     self.darkCorrect = None # Only if night time?
 
+    self.SetOutPath(OUTPUT_IMAGES_DIR)
+
 
   ##################################################################################
   ##################################################################################
-  def GetAutoExposure(self):
+  def GetAutoExposure(self, fixGain=None):
     ''' Get automatic exposure and gain '''
     self.PrepareVideo()
     self.camera.start_video_capture()
@@ -51,13 +53,16 @@ class zwo:
     if 'Exposure' in controls and controls['Exposure']['IsAutoSupported']:
       if self.verbose >= 2: print('Enabling auto-exposure mode')
       self.camera.set_control_value(asi.ASI_EXPOSURE, controls['Exposure']['DefaultValue'], auto=True)
+    self.camera.set_control_value(controls['AutoExpMaxExpMS']['ControlType'], 10000000) # 10 seconds at maximum
 
-    if 'Gain' in controls and controls['Gain']['IsAutoSupported']:
+    if 'Gain' in controls and controls['Gain']['IsAutoSupported'] and fixGain is None:
       if self.verbose >= 2: print('Enabling automatic gain setting')
       self.camera.set_control_value(asi.ASI_GAIN,  controls['Gain']['DefaultValue'], auto=True)
-
-    # Keep max gain to the default but allow exposure to be increased to its maximum value if necessary
-    self.camera.set_control_value(controls['AutoExpMaxExpMS']['ControlType'], controls['AutoExpMaxExpMS']['MaxValue'])
+      self.camera.set_control_value(controls['AutoExpMaxGain']['ControlType'], 80) # 10 seconds at maximum
+    else: #self.camera.set_control_value(asi.ASI_GAIN, fixGain, auto=False)
+      if self.verbose: print('Fixing gain to 0')
+      self.camera.set_control_value(asi.ASI_GAIN,  fixGain, auto=True)
+      self.camera.set_control_value(controls['AutoExpMaxGain']['ControlType'], 0) # 10 seconds at maximum
 
     sleep_interval = 0.100
     df_last = None
@@ -185,6 +190,16 @@ class zwo:
 
   ### Get methods
   ##################################################################
+  def SetPrefix(self, pr):
+    self.prefix = pr
+
+  def SetSufix(self, sf):
+    self.sufix = sf
+
+  def SetSufixTimeNow(self):
+    sufix = self.coor.GetTimeNow("%Y_%m_%d_%H_%M_%S")
+    self.SetSufix(sufix)
+
   def GetOutName(self):
     ''' Craft the name of the output file, considering the prefix and sufix, if any '''
     name = self.prefix + '_' if self.prefix is not None else ''
@@ -316,7 +331,14 @@ def main():
   cam.SetOutName(oname)
   cam.SetGain(gain)
   cam.SetExposure(exposure)
-  if autoExposure: cam.GetAutoExposure()
+  if autoExposure: 
+      print('Auto exposure!')
+      if cam.coor.IsNight():
+        print('Is night')
+        cam.GetAutoExposure()
+      else: 
+        print('Is day')
+        cam.GetAutoExposure(fixGain=0)
 
   cam.PrintControlValues()
   if outformat in ['jpg', 'jpeg']:

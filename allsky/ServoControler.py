@@ -8,7 +8,7 @@
 import RPi.GPIO as GPIO
 import time, sys, os
 
-from allsky.config import SERVO_PIN
+from allsky.config import SERVO_PIN, SHELL_LOG
 
 # Set GPIO numbering mode
 GPIO.setmode(GPIO.BOARD)
@@ -25,7 +25,7 @@ class ServoControl:
     self.open_angle = 155. # 105
     self.close_angle = 35.
     self.alt0 = 0.
-    self.logname = '.shellPos.log'
+    self.logname = SHELL_LOG
     self.alt_last  = self.ReadLog()
     print('Initial position: ', self.alt_last)
     if self.alt_last == self.open_angle:

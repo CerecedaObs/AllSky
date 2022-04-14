@@ -3,14 +3,12 @@ import time, sys, os
 
 '''
  This program controls the servo motor to open and close the shell
- To test: 
+ To test:
    >> python ServoControler.py open
    >> python ServoControler.py close
-
- # Servo connected to pin 11
-
 '''
 
+# Servo connected to pin 11
 PIN_SERVO = 11
 
 # Set GPIO numbering mode
@@ -25,8 +23,8 @@ class ServoControl:
     ''' Initialize servos and angles '''
     self.servo = GPIO.PWM(pin,50) 
     self.servo.start(0)
-    self.open_angle = 115.
-    self.close_angle = 0.
+    self.open_angle = 155. # 105
+    self.close_angle = 35.
     self.alt0 = 0.
     self.logname = '.shellPos.log'
     self.alt_last  = self.ReadLog()

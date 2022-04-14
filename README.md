@@ -5,6 +5,7 @@ Software to control allsky camera project
 ### Install the software
 
 Download the software, move to the instalation folder and execute:
+
     pip3 install -e .
 
 

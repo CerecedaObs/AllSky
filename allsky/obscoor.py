@@ -43,14 +43,18 @@ class obscoor:
   def IsNight(self):
     return self.obs.is_night(self.GetAstroTimeNow(utc=True))
 
-  def GetSunsetTime(self):
-    sunset = self.obs.sun_set_time(self.GetAstroTimeNow()).datetime
+  def GetSunsetTime(self, some_time=None):
+    if some_time is None: some_time = (self.GetAstroTimeNow())
+    elif not isinstance(some_time, Time): some_time = Time(some_time) 
+    sunset = self.obs.sun_set_time(some_time).datetime
     sunset = sunset.replace(tzinfo=pytz.utc) 
     sunset = sunset.astimezone(self.tz)
     return sunset
 
-  def GetSunriseTime(self):
-    sunrise = self.obs.sun_rise_time(self.GetAstroTimeNow()).datetime
+  def GetSunriseTime(self, some_time=None):
+    if some_time is None: some_time = (self.GetAstroTimeNow())
+    elif not isinstance(some_time, Time): some_time = Time(some_time) 
+    sunrise = self.obs.sun_rise_time(some_time).datetime
     sunrise = sunrise.replace(tzinfo=pytz.utc) 
     sunrise = sunrise.astimezone(self.tz)
     return sunrise

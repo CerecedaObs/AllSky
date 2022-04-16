@@ -137,6 +137,19 @@ class ServoControl:
     return float(r)
 
 
+###################################################################################
+
+def AllSky_OpenShell():
+  SC = ServoControl(verbose=False)
+  SC.OpenDome()
+  time.sleep(2)
+
+def AllSky_CloseShell():
+  SC = ServoControl(verbose=False)
+  SC.CloseDome()
+  time.sleep(2)
+
+
 if __name__=='__main__':
   servo = ServoControl()
   args = sys.argv

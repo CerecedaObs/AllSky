@@ -46,14 +46,13 @@ class zwo:
   def GetAutoExposure(self, fixGain=None):
     ''' Get automatic exposure and gain '''
     self.PrepareVideo()
-    self.camera.start_video_capture()
-    self.camera.set_control_value(asi.ASI_EXPOSURE, 500000)
-    self.SetTimeOut()
+    #self.SetTimeOut()
     controls = self.camera.get_controls()
     if 'Exposure' in controls and controls['Exposure']['IsAutoSupported']:
       if self.verbose >= 2: print('Enabling auto-exposure mode')
-      self.camera.set_control_value(asi.ASI_EXPOSURE, controls['Exposure']['DefaultValue'], auto=True)
-    self.camera.set_control_value(controls['AutoExpMaxExpMS']['ControlType'], 10000000) # 10 seconds at maximum
+      #self.camera.set_control_value(asi.ASI_EXPOSURE, controls['Exposure']['DefaultValue'], auto=True)
+      self.camera.set_control_value(asi.ASI_EXPOSURE, 2000000, auto=True)
+    self.camera.set_control_value(controls['AutoExpMaxExpMS']['ControlType'], 10000000)#controls['AutoExpMaxExpMS']['MaxValue']) # 10 seconds at maximum
 
     if 'Gain' in controls and controls['Gain']['IsAutoSupported'] and fixGain is None:
       if self.verbose >= 2: print('Enabling automatic gain setting')
@@ -69,6 +68,7 @@ class zwo:
     gain_last = None
     exposure_last = None
     matches = 0
+    self.camera.start_video_capture()
     while True:
       time.sleep(sleep_interval)
       settings = self.camera.get_control_values()
@@ -200,6 +200,10 @@ class zwo:
     sufix = self.coor.GetTimeNow("%Y_%m_%d_%H_%M_%S")
     self.SetSufix(sufix)
 
+  def GetTemperature(self):
+    settings = self.camera.get_control_values()
+    return settings['Temperature']
+
   def GetOutName(self):
     ''' Craft the name of the output file, considering the prefix and sufix, if any '''
     name = self.prefix + '_' if self.prefix is not None else ''
@@ -274,6 +278,7 @@ class zwo:
 
   def SnapFIT(self):
     ''' Save a FITs file '''
+    self.camera.set_image_type(asi.ASI_IMG_RAW16)
     img = self.GetRawImage()
     hdu = fits.PrimaryHDU(img)
     filename = self.GetFileName('fit')
@@ -327,7 +332,7 @@ def main():
   outformat = args.format.lower()
   autoExposure = args.autoExposure
 
-  cam = zwo()
+  cam = zwo(verbose=verbose)
   cam.SetOutName(oname)
   cam.SetGain(gain)
   cam.SetExposure(exposure)

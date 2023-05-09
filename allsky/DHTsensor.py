@@ -33,7 +33,7 @@ def GetTempAndHumSafe(nit=1):
   count = 0
   while count < nit:
     h, t = Adafruit_DHT.read_retry(DHT_SENSOR_TYPE, DHT_GPIO_PIN)
-    time.sleep(1)
+    time.sleep(0.2)
     if h is None or temp is None: continue
     else:
       hum.append(h)
@@ -47,4 +47,6 @@ if __name__ == '__main__':
     h, t = Adafruit_DHT.read_retry(DHT_SENSOR_TYPE, DHT_GPIO_PIN)
     print('Temp = ', t,', Hum = ', h, ' %')
     time.sleep(1)
+
+
 
